@@ -18,22 +18,23 @@ class TestHTMLNode(unittest.TestCase):
 
 class TestLeafNode(unittest.TestCase):
     def test_value_error(self):
-        leaf_1 = LeafNode(tag="a",props={"href":"https//:www.google.com"})
+        leaf_1 = LeafNode("a",None,{"href":"https//:www.google.com"})
         self.assertRaises(ValueError, lambda: leaf_1.to_html())
     
     def test_tag_is_none(self):
-        leaf_1 = LeafNode(value="This is a paragraph")
+        leaf_1 = LeafNode(None,"This is a paragraph", None)
         results = leaf_1.to_html()
         self.assertEqual(results, "This is a paragraph")
     
     def test_basic_leaf_node(self):
-        leaf_1 = LeafNode("p","This is a paragraph")
+        leaf_1 = LeafNode("p","This is a paragraph", None)
         results = leaf_1.to_html()
         self.assertEqual(results,"<p>This is a paragraph</p>")
     
     def test_leaf_node_with_props(self):
         leaf_1 = LeafNode("a","Click Me!",{"href":"https://www.google.com"})
         self.assertEqual(leaf_1.to_html(),'<a href="https://www.google.com">Click Me!</a>')
+
 class TestParentNode(unittest.TestCase):
     def test_basic_parent_node(self):
         results = ParentNode("p",[
@@ -44,11 +45,11 @@ class TestParentNode(unittest.TestCase):
         self.assertEqual(results.to_html(), "<p><b>Bold text</b>Normal text<i>italic text</i>Normal text</p>")
     
     def test_no_tag_error(self):
-        results = ParentNode(children=[LeafNode("b", "Bold text"), LeafNode("i", "italic text")])
+        results = ParentNode(None,[LeafNode("b", "Bold text"), LeafNode("i", "italic text")])
         self.assertRaises(ValueError, lambda: results.to_html())
     
     def test_no_child_error(self):
-        results = ParentNode(tag="p")
+        results = ParentNode(tag="p", children=None)
         self.assertRaises(ValueError,results.to_html)
 
     def test_to_html_with_children(self):

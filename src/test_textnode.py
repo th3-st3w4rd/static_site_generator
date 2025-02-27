@@ -14,8 +14,8 @@ class TestTextNode(unittest.TestCase):
         self.assertFalse(result)
 
     def test_reper(self):
-        node_1 = TextNode("test repr string", "links", "https://example.com")
-        self.assertEqual(node_1.__repr__(), "TextNode(test repr string, links, https://example.com)")
+        node_1 = TextNode("test repr string", TextType.LINK, "https://example.com")
+        self.assertEqual(repr(node_1), "TextNode(test repr string, link, https://example.com)")
 
 if __name__ == "__main__":
     unittest.main()
