@@ -1,16 +1,8 @@
 import unittest
-from mdnode import split_nodes_delimiter
+from mdnode import split_nodes_delimiter, extract_markdown_links, extract_markdown_images
 from textnode import TextNode, TextType
 
 class TestSplitNodesDelimiter(unittest.TestCase):
-    #def test_no_delimeter_error(self):
-    #    node = TextNode("This is text with a code block word", TextType.TEXT)
-    #    self.assertRaises(ValueError, lambda: split_nodes_delimiter([node], "`", TextType.CODE))
-
-    #def test_only_one_delimeter_error(self):
-    #    node = TextNode("This is text with a `code block word", TextType.TEXT)
-    #    self.assertRaises(ValueError, lambda: split_nodes_delimiter([node], "`", TextType.CODE))
-
     def test_split_nodes_delimeter_bold(self):
         node = TextNode("This is text with a **bolded letters** word", TextType.TEXT)
         results = split_nodes_delimiter([node], "**", TextType.BOLD)
@@ -94,5 +86,17 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             ],
             new_nodes,
         )
+
+class TestExtractFunctions(unittest.TestCase):
+    def test_extract_markdown_images(self):
+        test_string = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
+        output = extract_markdown_images(test_string)
+        self.assertEqual(str(output), "[('rick roll', 'https://i.imgur.com/aKaOqIh.gif'), ('obi wan', 'https://i.imgur.com/fJRm4Vk.jpeg')]")
+
+
+    def test_extract_markdown_images(self):
+        test_string = "This is text with a link [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)"
+        output = extract_markdown_links(test_string)
+        self.assertEqual(str(output), "[('to boot dev', 'https://www.boot.dev'), ('to youtube', 'https://www.youtube.com/@bootdotdev')]")
 if __name__ == "__main__":
     unittest.main()
