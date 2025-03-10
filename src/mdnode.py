@@ -109,6 +109,13 @@ def text_to_text_nodes(text):
     return split_nodes_delimiter(split_nodes_delimiter(split_nodes_delimiter(split_nodes_link(split_nodes_image(text)), "`", TextType.CODE), "**", TextType.BOLD), "_", TextType.ITALIC)
     
 
+def markdown_to_blocks(md):
+    results = []
+    blocked = md.split("\n\n")
+    for block in blocked:
+        results.append(block.strip())
+    return results
+
 """This is the psuedo imperitive testing"""
 #test_string = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
 #final = extract_markdown_images(test_string)
@@ -134,3 +141,17 @@ def text_to_text_nodes(text):
 
 #chacha = [TextNode("This is **text** with an _italic_ word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)", TextType.TEXT)]
 #final = text_to
+
+
+#md = """
+#This is **bolded** paragraph
+#
+#This is another paragraph with _italic_ text and `code` here
+#This is the same paragraph on a new line
+#
+#- This is a list
+#- with items
+#"""
+#final = markdown_to_blocks(md)
+#print(final)
+
