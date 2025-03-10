@@ -1,5 +1,15 @@
 from textnode import TextNode, TextType
+from htmlnode import HTMLNode
 import re
+from enum import Enum
+
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
@@ -116,6 +126,102 @@ def markdown_to_blocks(md):
         results.append(block.strip())
     return results
 
+def block_to_block_type(single_block):
+    if single_block.startswith("#"):
+        return BlockType.HEADING
+    elif single_block.startswith("```") and single_block.endswith("```"):
+        return BlockType.CODE
+    elif single_block.startswith("> "):
+        return BlockType.QUOTE
+    elif single_block.startswith("- "):
+        return BlockType.UNORDERED_LIST
+    elif single_block.startswith(". "):
+        return BlockType.ORDERED_LIST
+    else:
+        return BlockType.PARAGRAPH
+
+
+def text_node_to_html_nodes(text_nodes):
+    html_nodes = []
+    for text_node in text_nodes:
+        html_nodes.append(text_node_to_html_node(text_node))
+    return html_nodes
+
+
+def create_block_node(block, block_type):
+    if block_type == BlockType.PARAGRAPH:
+        text_nodes = text_to_text_nodes(block)
+        html_nodes = text_node_to_html_nodes(text_nodes)
+        return HTMLNode("p", None, html_nodes)
+    elif block_type == BlockType.HEADING:
+        level = 0
+        for char in block:
+            if char == "#":
+                level +=1
+            else:
+                break
+        heading_text = block[level:].strip()
+        text_nodes = text_to_text_nodes(heading_text)
+        heading_nodes = text_node_to_html_nodes(text_nodes)
+        return HTMLNode(f"h{level}", None, heading_nodes)
+    
+    elif block_type == BlockType.CODE:
+        code_content = block[3:-3].strip()
+        text_node = TextNode(code_content, TextType.TEXT)
+        code_node = text_node_to_html_node(text_node)
+        return HTMLNode("pre", None, [HTMLNode("code", None, [code_node])])
+
+    elif block_type == BlockType.QUOTE:
+        lines = block.split("\n")
+        quote_content = ""
+        for line in lines:
+            if line.startswith(">"):
+                if line.startswith("> "):
+                    line = line[2:]
+                else:
+                    line = line[1:]
+            quote_content += line + "\n"
+        quote_content = quote_content.strip()
+        text_nodes = text_to_text_nodes(quote_content)
+        quote_nodes = text_node_to_html_nodes(text_nodes)
+        return HTMLNode("blockquote", None, quote_nodes)
+    
+    elif block_type == BlockType.UNORDERED_LIST:
+        lines = block.split("\n")
+        list_items = []
+        for line in lines:
+            if line.startswith("- "):
+                item_text = line[2:]
+                text_nodes = text_to_text_nodes(item_text)
+                item_nodes = text_node_to_html_nodes(text_nodes)
+                list_items.append(HTMLNode("li", None, item_nodes))
+        return HTMLNode("ul", None, list_items)
+
+    elif block_type == BlockType.ORDERED_LIST:
+        lines = block.split("\n")
+        list_items = []
+        for line in lines:
+            dot_index = line.find(". ")
+            if dot_index > 0:
+                prefix = line[:dot_index]
+                if prefix.isdigit():
+                    item_text = line[dot_index+2:]
+                    text_nodes = text_to_text_nodes(item_text)
+                    item_nodes = text_node_to_html_nodes(text_nodes)
+                    list_items.append(HTMLNode("li", None, item_nodes))
+        return HTMLNode("ol", None, list_items)
+
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    children =[]
+    for block in blocks:
+        block_type = block_to_block_type(block)
+        block_node = create_block_node(block, block_type)
+        children.append(block_node)
+    parent_node = HTMLNode("div", None, children)
+    return parent_node
+
 """This is the psuedo imperitive testing"""
 #test_string = "This is text with a ![rick roll](https://i.imgur.com/aKaOqIh.gif) and ![obi wan](https://i.imgur.com/fJRm4Vk.jpeg)"
 #final = extract_markdown_images(test_string)
@@ -153,5 +259,18 @@ def markdown_to_blocks(md):
 #- with items
 #"""
 #final = markdown_to_blocks(md)
+#print(final)
+
+#test_md = """
+# Title of things!
+
+#This is **bolded** paragraph
+#text in a p
+#tag here
+
+#This is another paragraph with _italic_ text and `code` here
+
+#"""
+#final = markdown_to_html_node(test_md)
 #print(final)
 

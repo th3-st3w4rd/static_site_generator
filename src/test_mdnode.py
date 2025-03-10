@@ -7,6 +7,8 @@ from mdnode import (
         split_nodes_image,
         text_to_text_nodes,
         markdown_to_blocks,
+        BlockType,
+        block_to_block_type,
 )
 
 from textnode import TextNode, TextType
@@ -171,6 +173,37 @@ This is the same paragraph on a new line
                 "- This is a list\n- with items",
             ],
         )
+
+    def test_mardown_to_blocks_header(self):
+        block_heading = "# This is a heading."
+        block_type = block_to_block_type(block_heading)
+        self.assertEqual(block_type, BlockType.HEADING)
+
+    def test_mardown_to_blocks_quote(self):
+        block_quote = "> This is a quote!"
+        block_type = block_to_block_type(block_quote)
+        self.assertEqual(block_type, BlockType.QUOTE)
+
+
+    def test_mardown_to_blocks_code(self):
+        block_code = "``` This is code!```"
+        block_type = block_to_block_type(block_code)
+        self.assertEqual(block_type, BlockType.CODE)
+
+    def test_mardown_to_blocks_ul(self):
+        block_ul = "- This is a quote!"
+        block_type = block_to_block_type(block_ul)
+        self.assertEqual(block_type, BlockType.UNORDERED_LIST)
+
+    def test_mardown_to_blocks_ol(self):
+        block_ol = ". 1 This is an ordered list."
+        block_type = block_to_block_type(block_ol)
+        self.assertEqual(block_type, BlockType.ORDERED_LIST)
+
+    def test_mardown_to_blocks_(self):
+        block_paragraph= "This is a plain ole' paragraph."
+        block_type = block_to_block_type(block_paragraph)
+        self.assertEqual(block_type, BlockType.PARAGRAPH)
 
 
 if __name__ == "__main__":
